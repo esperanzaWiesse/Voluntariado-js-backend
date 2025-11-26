@@ -1,0 +1,104 @@
+# 🧩 backend del sistema de voluntariado
+
+## Descripcion el sistema: 
+este es un proyecto en el se gestiona el voluntariado de una institucion. 
+
+## requerimientos: 
+* mysql
+* nodeJS (instalara NPM de forma automatica)
+
+## para levantar el proyecto de forma local
+abrir una terminal en la raiz del proyecto, correr el siguiente comando:
+
+``` bash
+npm install
+```
+> **📝 Nota:**  Esto descargara todas las dependencias nesesarias para correr el proyecto
+
+> **💡TIP:**
+> Puedes usar visual estudio code para abrir el proyecto, despues presiona `control + j` para abrir el terminal. Luego ejecuta el comando de arriba. 
+
+## pasos para probar el funcionamiento del backend 
+1.  
+2.  
+3.  
+4.  
+5.  
+
+## estructura de archivos
+```txt
+backend/
+│
+├── src/
+│   ├── config/
+│   │   ├── database.js          # Configuración de conexión a BD
+│   │   ├── environment.js       # Variables de entorno
+│   │   └── swagger.js           # Configuración de documentación API
+│   │
+│   ├── models/
+│   │   ├── Usuario.js           # Modelo de Usuario
+│   │   ├── Actividad.js         # Modelo de Actividad
+│   │   ├── JuntaVoluntariado.js # Modelo de Junta Voluntariado
+│   │   ├── GrupoVoluntariado.js # Modelo de Grupo Voluntariado
+│   │   ├── UsuarioJuntaVol.js   # Modelo relación Usuario-Junta
+│   │   ├── Rol.js               # Modelo de Rol
+│   │   └── Certificado.js       # Modelo de Certificado
+│   │
+│   ├── controllers/
+│   │   ├── usuarioController.js        # Lógica de negocio de usuarios
+│   │   ├── actividadController.js      # CRUD y lógica de actividades
+│   │   ├── juntaController.js          # Gestión de juntas
+│   │   ├── grupoController.js          # Gestión de grupos
+│   │   ├── inscripcionController.js    # Inscripciones usuario-junta
+│   │   ├── rolController.js            # Gestión de roles
+│   │   ├── certificadoController.js    # Generación y gestión de certificados
+│   │   └── authController.js           # Autenticación y autorización
+│   │
+│   ├── routes/
+│   │   ├── usuarioRoutes.js     # Rutas de usuarios
+│   │   ├── actividadRoutes.js   # Rutas de actividades
+│   │   ├── juntaRoutes.js       # Rutas de juntas
+│   │   ├── grupoRoutes.js       # Rutas de grupos
+│   │   ├── inscripcionRoutes.js # Rutas de inscripciones
+│   │   ├── rolRoutes.js         # Rutas de roles
+│   │   ├── certificadoRoutes.js # Rutas de certificados
+│   │   ├── authRoutes.js        # Rutas de autenticación
+│   │   └── index.js             # Centralizador de rutas
+│   │
+│   ├── middlewares/
+│   │   ├── authMiddleware.js    # Verificación de JWT
+│   │   ├── roleMiddleware.js    # Validación de permisos por rol
+│   │   ├── validationMiddleware.js # Validación de datos de entrada
+│   │   ├── errorHandler.js      # Manejo centralizado de errores
+│   │   └── uploadMiddleware.js  # Manejo de archivos subidos
+│   │
+│   ├── services/
+│   │   ├── emailService.js      # Envío de correos electrónicos
+│   │   ├── pdfService.js        # Generación de certificados PDF
+│   │   ├── authService.js       # Lógica de autenticación
+│   │   └── notificationService.js # Notificaciones del sistema
+│   │
+│   ├── utils/
+│   │   ├── validator.js         # Funciones de validación
+│   │   ├── dateHelper.js        # Helpers para fechas
+│   │   ├── responseHandler.js   # Estandarización de respuestas
+│   │   └── constants.js         # Constantes del sistema
+│   │
+│   ├── database/
+│   │   ├── migrations/          # Scripts de migración de BD
+│   │   └── seeders/             # Datos iniciales para BD
+│   │
+│   └── app.js                   # Configuración principal de Express
+│
+├── tests/
+│   ├── unit/                    # Tests unitarios
+│   └── integration/             # Tests de integración
+│
+├── .env                         # Variables de entorno
+├── .env.example                 # Ejemplo de variables de entorno
+├── .gitignore                   # Archivos ignorados por Git
+├── package.json                 # Dependencias y scripts
+└── server.js                    # Punto de entrada de la aplicación
+```
+
+## vdfv
