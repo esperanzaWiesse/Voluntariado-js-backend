@@ -1,51 +1,25 @@
-/*
-    Ruta: /api/usuarios
-*/
-const { Router } = import('express');
-const { check } = import('express-validator');
-const { validarCampos } = import('../middlewares/validar-campos');
-
-const { postUsuario, getUsuarios, getUsuarioId, updateUsuario, deleteUsuario } = import('../controllers/usuarios');
-
-const { 
-    validarJWT, 
-    varlidarADMIN_ROLE,
-    varlidarADMIN_ROLE_o_MismoUsuario
- } = import('../middlewares/validar-jwt');
-
+import { Router } from 'express';
+import { 
+    obtenerUsuarios, 
+    crearUsuario, 
+    actualizarUsuario, 
+    eliminarUsuario,
+    buscarPorDNI
+} from '../controllers/usuarios.js';
+import { validarJWT } from '../middlewares/validar-jwt.js';
+import { validarCampos } from '../middlewares/validar-campos.js';
 
 const router = Router();
 
+// Rutas públicas
+// (ninguna - todas requieren autenticación)
 
-router.get( '/', validarJWT , getUsuarios );
+// Rutas protegidas - requieren autenticación
+router.get('/', validarJWT, obtenerUsuarios);
+router.get('/:id', validarJWT, obtenerUsuarios);
+router.get('/dni/:dni', validarJWT, buscarPorDNI);
+router.post('/', validarJWT, validarCampos, crearUsuario);
+router.put('/:id', validarJWT, validarCampos, actualizarUsuario);
+router.delete('/:id', validarJWT, eliminarUsuario);
 
-router.post( '/',
-    [
-        check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-        check('password', 'El password es obligatorio').not().isEmpty(),
-        check('email', 'El email es obligatorio').isEmail(),
-        validarCampos,
-    ], 
-    postUsuario 
-);
-
-router.put( '/:id',
-    [
-        validarJWT,
-        varlidarADMIN_ROLE_o_MismoUsuario,
-        check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-        check('email', 'El email es obligatorio').isEmail(),
-        check('role', 'El role es obligatorio').not().isEmpty(),
-        validarCampos,
-    ],
-    updateUsuario
-);
-
-router.delete( '/:id',
-    [ validarJWT, varlidarADMIN_ROLE ],
-    deleteUsuario
-);
-
-
-
-module.exports = router;
+export default router;

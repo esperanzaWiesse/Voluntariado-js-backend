@@ -1,40 +1,13 @@
-/*
-    Path: '/api/login'
-*/
-const { Router } = import('express');
-const { login, googleSignIn, renewToken } = import('../controllers/auth');
-const { check } = import('express-validator');
-const { validarCampos } = import('../middlewares/validar-campos');
-const { validarJWT } = import('../middlewares/validar-jwt');
+import { Router } from 'express';
+import { login, renovarToken } from '../controllers/autenticacion.js';
+import { validarJWT } from '../middlewares/validar-jwt.js';
 
 const router = Router();
 
+// Ruta de login - pública
+router.post('/login', login);
 
-router.post( '/',
-    [
-        check('email', 'El email es obligatorio').isEmail(),
-        check('password', 'El password es obligatorio').not().isEmpty(),
-        validarCampos
-    ],
-    login
-);
+// Renovar token - requiere token válido
+router.get('/renew', validarJWT, renovarToken);
 
-router.post( '/google',
-    [
-        check('token', 'El token de Google es obligatorio').not().isEmpty(),
-        validarCampos
-    ],
-    googleSignIn
-)
-
-router.get( '/renew',
-    validarJWT,
-    renewToken
-)
-
-
-
-
-
-
-module.exports = router;
+export default router;

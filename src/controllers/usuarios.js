@@ -1,140 +1,225 @@
-const { response } = import('express');
-const bcrypt = import('bcryptjs');
+import bcrypt from 'bcryptjs';
+import pool from '../config/database.js';
 
-const Usuario = import('../models/usuario');
-const { generarJWT } = import('../helpers/jwt');
+// Obtener todos los usuarios o uno específico
+export const obtenerUsuarios = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const accion = 'SELECT';
+        const idUsuario = id ? parseInt(id) : null;
+        
+        const [result] = await pool.query(
+            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+            [accion, idUsuario]
+        );
 
-// Crear la tabla al iniciar
-Usuario.crearTabla();
+        const usuarios = result[0];
+        
+        // Remover passwords de la respuesta
+        const usuariosSinPassword = usuarios.map(usuario => {
+            const { password, ...usuarioSinPass } = usuario;
+            return usuarioSinPass;
+        });
 
-// Crear usuario
-const postUsuario = async (req, res) => {
-  try {
-    const usuario = await Usuario.crear(req.body);
-    res.status(201).json({
-      ok: true,
-      usuario
-    });
-  } catch (error) {
-    res.status(400).json({
-      ok: false,
-      msg: error.message
-    });
-  }
-};
+        res.status(200).json({
+            ok: true,
+            usuarios: usuariosSinPassword
+        });
 
-// Obtener usuarios
-const getUsuarios = async (req, res) => {
-  try {
-    const { limite = 10, desde = 0 } = req.query;
-    const usuarios = await Usuario.obtenerTodos(Number(limite), Number(desde));
-    
-    res.json({
-      ok: true,
-      usuarios
-    });
-  } catch (error) {
-    res.status(500).json({
-      ok: false,
-      msg: error.message
-    });
-  }
-};
-
-// Obtener usuario por ID
-const getUsuarioPorId = async (req, res) => {
-  try {
-    const usuario = await Usuario.buscarPorId(req.params.id);
-    
-    if (!usuario) {
-      return res.status(404).json({
-        ok: false,
-        msg: 'Usuario no encontrado'
-      });
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener usuarios',
+            error: error.message
+        });
     }
-    
-    res.json({
-      ok: true,
-      usuario
-    });
-  } catch (error) {
-    res.status(500).json({
-      ok: false,
-      msg: error.message
-    });
-  }
 };
 
-// Obtener usuario por ID
-const getUsuarioId = async (req, res) => {
-  try {
-    const usuario = await Usuario.buscarPorId(req.params.id);
-    
-    if (!usuario) {
-      return res.status(404).json({
-        ok: false,
-        msg: 'Usuario no encontrado'
-      });
+// Crear un nuevo usuario
+export const crearUsuario = async (req, res) => {
+    try {
+        const { 
+            nombre, 
+            apPaterno, 
+            apMaterno, 
+            dni, 
+            email, 
+            password,
+            codUniversitario,
+            tipoCodUniversitario
+        } = req.body;
+
+        // Validaciones básicas
+        if (!nombre || !apPaterno || !apMaterno || !dni || !email || !password) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Todos los campos obligatorios deben ser completados'
+            });
+        }
+
+        // Encriptar contraseña
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(password, salt);
+
+        // Insertar usuario
+        const [result] = await pool.query(
+            'CALL sp_Usuario_CRUD(?, NULL, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                'INSERT',
+                nombre,
+                apPaterno,
+                apMaterno,
+                dni,
+                email,
+                hashedPassword,
+                codUniversitario || null,
+                tipoCodUniversitario || null
+            ]
+        );
+
+        const respuesta = result[0][0];
+
+        res.status(201).json({
+            ok: true,
+            msg: respuesta.Mensaje,
+            idUsuario: respuesta.idUsuario
+        });
+
+    } catch (error) {
+        console.error('Error al crear usuario:', error);
+        
+        // Manejo de errores específicos
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El DNI o email ya están registrados'
+            });
+        }
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al crear usuario',
+            error: error.message
+        });
     }
-    
-    res.json({
-      ok: true,
-      usuario
-    });
-  } catch (error) {
-    res.status(500).json({
-      ok: false,
-      msg: error.message
-    });
-  }
 };
 
 // Actualizar usuario
-const updateUsuario = async (req, res) => {
-  try {
-    const usuario = await Usuario.actualizar(req.params.id, req.body);
-    
-    res.json({
-      ok: true,
-      usuario
-    });
-  } catch (error) {
-    res.status(400).json({
-      ok: false,
-      msg: error.message
-    });
-  }
+export const actualizarUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { 
+            nombre, 
+            apPaterno, 
+            apMaterno, 
+            dni, 
+            email, 
+            password,
+            codUniversitario,
+            tipoCodUniversitario
+        } = req.body;
+
+        let hashedPassword = null;
+        if (password) {
+            const salt = bcrypt.genSaltSync(10);
+            hashedPassword = bcrypt.hashSync(password, salt);
+        }
+
+        const [result] = await pool.query(
+            'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                'UPDATE',
+                parseInt(id),
+                nombre || null,
+                apPaterno || null,
+                apMaterno || null,
+                dni || null,
+                email || null,
+                hashedPassword,
+                codUniversitario || null,
+                tipoCodUniversitario || null
+            ]
+        );
+
+        const respuesta = result[0][0];
+
+        res.status(200).json({
+            ok: true,
+            msg: respuesta.Mensaje,
+            idUsuario: respuesta.idUsuario
+        });
+
+    } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al actualizar usuario',
+            error: error.message
+        });
+    }
 };
 
 // Eliminar usuario
-const deleteUsuario = async (req, res) => {
-  try {
-    const eliminado = await Usuario.eliminar(req.params.id);
-    
-    if (!eliminado) {
-      return res.status(404).json({
-        ok: false,
-        msg: 'Usuario no encontrado'
-      });
+export const eliminarUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [result] = await pool.query(
+            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+            ['DELETE', parseInt(id)]
+        );
+
+        const respuesta = result[0][0];
+
+        res.status(200).json({
+            ok: true,
+            msg: respuesta.Mensaje
+        });
+
+    } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al eliminar usuario',
+            error: error.message
+        });
     }
-    
-    res.json({
-      ok: true,
-      msg: 'Usuario eliminado'
-    });
-  } catch (error) {
-    res.status(500).json({
-      ok: false,
-      msg: error.message
-    });
-  }
 };
 
+// Buscar usuario por DNI
+export const buscarPorDNI = async (req, res) => {
+    try {
+        const { dni } = req.params;
 
-module.exports = {
-    postUsuario,
-    getUsuarios,
-    getUsuarioId,
-    updateUsuario,
-    deleteUsuario
-}
+        const [result] = await pool.query(
+            'CALL sp_Usuario_CRUD(?, NULL, NULL, NULL, NULL, ?, NULL, NULL, NULL, NULL)',
+            ['SELECT', parseInt(dni)]
+        );
+
+        const usuario = result[0][0];
+
+        if (!usuario) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Usuario no encontrado'
+            });
+        }
+
+        const { password, ...usuarioSinPass } = usuario;
+
+        res.status(200).json({
+            ok: true,
+            usuario: usuarioSinPass
+        });
+
+    } catch (error) {
+        console.error('Error al buscar usuario por DNI:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al buscar usuario',
+            error: error.message
+        });
+    }
+};

@@ -1,157 +1,262 @@
-const db = require('../db');
+import db from '../config/database.js';
+import bcrypt from 'bcrypt';
 
 class Usuario {
   
-  // Crear la tabla si no existe
-  static async crearTabla() {
-    const query = `
-      CREATE TABLE IF NOT EXISTS usuarios (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nombre VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        img VARCHAR(255),
-        role VARCHAR(50) NOT NULL DEFAULT 'USER_ROLE',
-        google BOOLEAN DEFAULT false,
-        fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      )
-    `;
-    
-    try {
-      await db.query(query);
-      console.log('Tabla usuarios creada o ya existe');
-    } catch (error) {
-      console.error('Error creando tabla:', error);
-      throw error;
-    }
-  }
-
-  // Crear un nuevo usuario
+  // Crear un nuevo usuario usando SP (con hash automático)
   static async crear(usuarioData) {
-    const { nombre, email, password, img = null, role = 'USER_ROLE', google = false } = usuarioData;
-    
-    const query = `
-      INSERT INTO usuarios (nombre, email, password, img, role, google)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
+    const { 
+      nombre, 
+      apPaterno, 
+      apMaterno, 
+      dni, 
+      email, 
+      password, 
+      codUniversitario = null, 
+      tipoCodUniversitario = null 
+    } = usuarioData;
     
     try {
-      const [result] = await db.query(query, [nombre, email, password, img, role, google]);
+      // Hashear el password antes de insertar
+      const passwordHash = await bcrypt.hash(password, 10);
+      
+      const [result] = await db.query(
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          'INSERT',
+          null,
+          nombre,
+          apPaterno,
+          apMaterno,
+          dni,
+          email,
+          passwordHash, // Password hasheado
+          codUniversitario,
+          tipoCodUniversitario
+        ]
+      );
+      
+      const insertResult = result[0][0];
+      
+      if (insertResult.ErrorNumber) {
+        throw new Error(insertResult.ErrorMessage);
+      }
+      
       return {
-        id: result.insertId,
+        idUsuario: insertResult.idUsuario,
+        mensaje: insertResult.Mensaje,
         nombre,
+        apPaterno,
+        apMaterno,
+        dni,
         email,
-        img,
-        role,
-        google
+        codUniversitario,
+        tipoCodUniversitario
       };
     } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        if (error.message.includes('dni')) {
+          throw new Error('El DNI ya está registrado');
+        }
+        if (error.message.includes('email')) {
+          throw new Error('El email ya está registrado');
+        }
+      }
       throw error;
     }
   }
 
-  // Buscar por ID
+  // Buscar por ID usando SP
   static async buscarPorId(id) {
-    const query = 'SELECT * FROM usuarios WHERE id = ?';
-    
     try {
-      const [rows] = await db.query(query, [id]);
-      if (rows.length === 0) return null;
+      const [result] = await db.query(
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', id, null, null, null, null, null, null, null, null]
+      );
       
-      return Usuario.formatearRespuesta(rows[0]);
+      const usuarios = result[0];
+      if (usuarios.length === 0) return null;
+      
+      return Usuario.formatearRespuesta(usuarios[0]);
     } catch (error) {
       throw error;
     }
   }
 
-  // Buscar por email
+  // Buscar por email usando SP
   static async buscarPorEmail(email) {
-    const query = 'SELECT * FROM usuarios WHERE email = ?';
-    
     try {
-      const [rows] = await db.query(query, [email]);
-      if (rows.length === 0) return null;
+      const [result] = await db.query(
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', null, null, null, null, null, email, null, null, null]
+      );
       
-      return rows[0];
+      const usuarios = result[0];
+      if (usuarios.length === 0) return null;
+      
+      return usuarios[0]; // Retorna con password para autenticación
     } catch (error) {
       throw error;
     }
   }
 
-  // Obtener todos los usuarios
+  // Buscar por DNI usando SP
+  static async buscarPorDni(dni) {
+    try {
+      const [result] = await db.query(
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', null, null, null, null, dni, null, null, null, null]
+      );
+      
+      const usuarios = result[0];
+      if (usuarios.length === 0) return null;
+      
+      return Usuario.formatearRespuesta(usuarios[0]);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Obtener todos los usuarios usando SP
   static async obtenerTodos(limite = 10, desde = 0) {
-    const query = 'SELECT * FROM usuarios LIMIT ? OFFSET ?';
-    
     try {
-      const [rows] = await db.query(query, [limite, desde]);
-      return rows.map(row => Usuario.formatearRespuesta(row));
+      const [result] = await db.query(
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', null, null, null, null, null, null, null, null, null]
+      );
+      
+      const usuarios = result[0];
+      const usuariosPaginados = usuarios.slice(desde, desde + limite);
+      
+      return usuariosPaginados.map(row => Usuario.formatearRespuesta(row));
     } catch (error) {
       throw error;
     }
   }
 
-  // Actualizar usuario
+  // Actualizar usuario usando SP (hashea password si se proporciona)
   static async actualizar(id, usuarioData) {
-    const campos = [];
-    const valores = [];
-    
-    // Construir dinámicamente la query
-    if (usuarioData.nombre) {
-      campos.push('nombre = ?');
-      valores.push(usuarioData.nombre);
-    }
-    if (usuarioData.email) {
-      campos.push('email = ?');
-      valores.push(usuarioData.email);
-    }
-    if (usuarioData.password) {
-      campos.push('password = ?');
-      valores.push(usuarioData.password);
-    }
-    if (usuarioData.img !== undefined) {
-      campos.push('img = ?');
-      valores.push(usuarioData.img);
-    }
-    if (usuarioData.role) {
-      campos.push('role = ?');
-      valores.push(usuarioData.role);
-    }
-    
-    if (campos.length === 0) {
-      throw new Error('No hay campos para actualizar');
-    }
-    
-    valores.push(id);
-    const query = `UPDATE usuarios SET ${campos.join(', ')} WHERE id = ?`;
+    const { 
+      nombre, 
+      apPaterno, 
+      apMaterno, 
+      dni, 
+      email, 
+      password, 
+      codUniversitario, 
+      tipoCodUniversitario 
+    } = usuarioData;
     
     try {
-      await db.query(query, valores);
+      // Si se proporciona un nuevo password, hashearlo
+      let passwordHash = password ? await bcrypt.hash(password, 10) : null;
+      
+      const [result] = await db.query(
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          'UPDATE',
+          id,
+          nombre || null,
+          apPaterno || null,
+          apMaterno || null,
+          dni || null,
+          email || null,
+          passwordHash,
+          codUniversitario || null,
+          tipoCodUniversitario || null
+        ]
+      );
+      
+      const updateResult = result[0][0];
+      
+      if (updateResult.ErrorNumber) {
+        throw new Error(updateResult.ErrorMessage);
+      }
+      
       return await Usuario.buscarPorId(id);
     } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        if (error.message.includes('dni')) {
+          throw new Error('El DNI ya está registrado');
+        }
+        if (error.message.includes('email')) {
+          throw new Error('El email ya está registrado');
+        }
+      }
       throw error;
     }
   }
 
-  // Eliminar usuario
+  // Eliminar usuario usando SP
   static async eliminar(id) {
-    const query = 'DELETE FROM usuarios WHERE id = ?';
-    
     try {
-      const [result] = await db.query(query, [id]);
-      return result.affectedRows > 0;
+      const [result] = await db.query(
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['DELETE', id, null, null, null, null, null, null, null, null]
+      );
+      
+      const deleteResult = result[0][0];
+      
+      if (deleteResult.ErrorNumber) {
+        throw new Error(deleteResult.ErrorMessage);
+      }
+      
+      return true;
     } catch (error) {
       throw error;
     }
   }
 
-  // Formatear respuesta (similar al toJSON de Mongoose)
+  // Verificar password
+  static async verificarPassword(passwordPlain, passwordHash) {
+    return await bcrypt.compare(passwordPlain, passwordHash);
+  }
+
+  // Autenticar usuario (para login)
+  static async autenticar(email, password) {
+    try {
+      const usuario = await Usuario.buscarPorEmail(email);
+      
+      if (!usuario) {
+        throw new Error('Usuario no encontrado');
+      }
+      
+      const passwordValido = await bcrypt.compare(password, usuario.password);
+      
+      if (!passwordValido) {
+        throw new Error('Contraseña incorrecta');
+      }
+      
+      // Retornar usuario sin password
+      return Usuario.formatearRespuesta(usuario);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Formatear respuesta (elimina password)
   static formatearRespuesta(usuario) {
-    const { password, fecha_creacion, fecha_actualizacion, ...usuarioSinPassword } = usuario;
+    const { 
+      password, 
+      fecha_creacion, 
+      fecha_actualizacion, 
+      ...usuarioSinPassword 
+    } = usuario;
+    
     return {
-      uid: usuario.id,
+      uid: usuario.idUsuario,
       ...usuarioSinPassword
     };
+  }
+
+  // Contar total de usuarios
+  static async contarTotal() {
+    try {
+      const usuarios = await Usuario.obtenerTodos(999999, 0);
+      return usuarios.length;
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
