@@ -19,8 +19,8 @@ npm install
 > Puedes usar visual estudio code para abrir el proyecto, despues presiona `control + j` para abrir el terminal. Luego ejecuta el comando de arriba. 
 
 ## pasos para probar el funcionamiento del backend 
-1.  
-2.  
+1.  correr los scrips de la carpeta schema antes de hacer el depy de la api 
+2.  para correr de forma local la api, abrir un terminal en la raiz del proyecto y ejecutar el comando `npm start`   
 3.  
 4.  
 5.  
