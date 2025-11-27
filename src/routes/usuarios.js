@@ -15,7 +15,7 @@ const router = Router();
 // (ninguna - todas requieren autenticación)
 
 // Rutas protegidas - requieren autenticación
-router.get('/', validarJWT, obtenerUsuarios);
+router.get('/', obtenerUsuarios);
 router.get('/:id', validarJWT, obtenerUsuarios);
 router.get('/dni/:dni', validarJWT, buscarPorDNI);
 router.post('/', validarJWT, validarCampos, crearUsuario);
