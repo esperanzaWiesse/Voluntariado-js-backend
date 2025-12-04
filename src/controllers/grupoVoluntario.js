@@ -1,7 +1,7 @@
 import pool from '../config/database.js';
 
-// Obtener todas las actividades o una específica
-export const obtenerActividades = async (req, res) => {
+// Obtener todos los grupoVoluntario
+export const obtenerGrupoVoluntario = async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -9,40 +9,37 @@ export const obtenerActividades = async (req, res) => {
         const idActividad = id ? parseInt(id) : null;
         
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL)',
+            'CALL sp_GrupoVoluntariado_CRUD(?, ?, NULL, NULL)',
             [accion, idActividad]
         );
 
-        const actividades = result[0];
+        const grupoVoluntario = result[0];
         
         res.status(200).json({
             ok: true,
-            actividades: actividades
+            grupoVoluntario: grupoVoluntario
         });
 
     } catch (error) {
-        console.error('Error al obtener actividades:', error);
+        console.error('Error al obtener grupoVoluntario:', error);
         res.status(500).json({
             ok: false,
-            msg: 'Error al obtener actividades',
+            msg: 'Error al obtener grupoVoluntario',
             error: error.message
         });
     }
 };
 
-
-// Crear un nueva actividad
-export const crearActividad = async (req, res) => {
+// Crear un nuevo grupoVoluntario
+export const crearGrupoVoluntario = async (req, res) => {
     try {
         const { 
-            nombre, 
-            descripcion, 
-            fecha, 
-            duracionhoras, 
+            nombreGrupoVoluntariado, 
+            fechaCreacionGrupoVoluntariado,
         } = req.body;
 
         // Validaciones básicas
-        if (!nombre || !descripcion || !fecha || !duracionhoras) {
+        if (!nombreGrupoVoluntariado || !fechaCreacionGrupoVoluntariado) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Todos los campos obligatorios deben ser completados'
@@ -51,13 +48,11 @@ export const crearActividad = async (req, res) => {
 
         // Insertar usuario
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, NULL, ?, ?, ?, ?)',
+            'CALL sp_GrupoVoluntariado_CRUD(?, NULL, ?, ?)',
             [
                 'INSERT',
-                nombre, 
-                descripcion, 
-                fecha, 
-                duracionhoras, 
+                nombreGrupoVoluntariado, 
+                fechaCreacionGrupoVoluntariado, 
             ]
         );
 
@@ -66,48 +61,44 @@ export const crearActividad = async (req, res) => {
         res.status(201).json({
             ok: true,
             msg: respuesta.Mensaje,
-            idActividad: respuesta.idActividad
+            idGrupoVoluntario: respuesta.idGrupoVoluntario
         });
 
     } catch (error) {
-        console.error('Error al crear actividad:', error);
+        console.error('Error al crear grupoVoluntario:', error);
         
         // Manejo de errores específicos
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({
                 ok: false,
-                msg: 'La actividad ya está registrada'
+                msg: 'El grupo voluntario ya está registrado'
             });
         }
 
         res.status(500).json({
             ok: false,
-            msg: 'Error al crear Actividad',
+            msg: 'Error al crear grupoVoluntario',
             error: error.message
         });
     }
 };
 
-// Actualizar actividad
-export const actualizarActividad = async (req, res) => {
+// Actualizar grupoVoluntario
+export const actualizarGrupoVoluntario = async (req, res) => {
     try {
         const { id } = req.params;
         const { 
-            nombre, 
-            descripcion, 
-            fecha, 
-            duracionhoras,
+            nombreGrupoVoluntariado, 
+            fechaCreacionGrupoVoluntariado,
         } = req.body;
 
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, ?, ?, ?, ?, ?)',
+            'CALL sp_GrupoVoluntariado_CRUD(?, ?, ?, ?)',
             [
                 'UPDATE',
                 parseInt(id),
-                nombre || null,
-                descripcion || null,
-                fecha || null,
-                duracionhoras || null
+                nombreGrupoVoluntariado || null,
+                fechaCreacionGrupoVoluntariado || null
             ]
         );
 
@@ -116,25 +107,25 @@ export const actualizarActividad = async (req, res) => {
         res.status(200).json({
             ok: true,
             msg: respuesta.Mensaje,
-            idActividad: respuesta.idActividad
+            idGrupoVoluntario: respuesta.idGrupoVoluntario
         });
 
     } catch (error) {
-        console.error('Error al actualizar actividad:', error);
+        console.error('Error al actualizar grupoVoluntario:', error);
         res.status(500).json({
             ok: false,
-            msg: 'Error al actualizar actividad',
+            msg: 'Error al actualizar grupoVoluntario',
             error: error.message
         });
     }
 };
 
-export const eliminarActividad = async (req, res) => {
+export const eliminarGrupoVoluntario = async (req, res) => {
     try {
         const { id } = req.params;
 
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL)',
+            'CALL sp_GrupoVoluntariado_CRUD(?, ?, NULL, NULL)',
             ['DELETE', parseInt(id)]
         );
 
@@ -146,10 +137,10 @@ export const eliminarActividad = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error al eliminar actividad:', error);
+        console.error('Error al eliminar grupoVoluntario:', error);
         res.status(500).json({
             ok: false,
-            msg: 'Error al eliminar actividad',
+            msg: 'Error al eliminar grupoVoluntario',
             error: error.message
         });
     }

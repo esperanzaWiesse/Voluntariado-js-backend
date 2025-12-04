@@ -24,6 +24,12 @@ const esquemas = {
             // estado: { requerido: false, tipo: 'enum', valores: ['activa', 'cancelada', 'finalizada'] }
         }
     },
+    grupoVoluntario:{
+        campos: {
+            nombreGrupoVoluntariado: { requerido: true, tipo: 'string', min: 3, max: 150 },
+            fechaCreacionGrupoVoluntariado: { requerido: false, tipo: 'date' }
+        }
+    },
     rol: {
         campos: {
             nombre: { requerido: true, tipo: 'string', min: 3, max: 50 },

@@ -5,7 +5,7 @@ const crearUsuarioInicial = async () => {
     try {
         // Verificar si ya existe un usuario administrador
         const [usuarios] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+            'CALL sp_Usuario_CRUD(?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
             ['SELECT']
         );
 

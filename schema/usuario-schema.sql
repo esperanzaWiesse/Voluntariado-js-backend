@@ -24,6 +24,7 @@ CREATE TABLE usuario (
     fecha_eliminacion TIMESTAMP NULL COMMENT 'Fecha cuando se eliminó lógicamente'
 );
 
+
 -- Procedimiento almacenado CRUD para Usuario con delete lógico
 CREATE PROCEDURE sp_Usuario_CRUD(
     IN p_Accion VARCHAR(10),
@@ -32,6 +33,7 @@ CREATE PROCEDURE sp_Usuario_CRUD(
     IN p_apPaterno VARCHAR(100),
     IN p_apMaterno VARCHAR(100),
     IN p_dni INT,
+    IN p_rol VARCHAR(100),
     IN p_email VARCHAR(150),
     IN p_password VARCHAR(255),
     IN p_codUniversitario VARCHAR(20),
@@ -51,8 +53,8 @@ BEGIN
     START TRANSACTION;
 
     IF p_Accion = 'INSERT' THEN
-        INSERT INTO usuario (nombre, apPaterno, apMaterno, dni, email, password, codUniversitario, tipoCodUniversitario, activo)
-        VALUES (p_nombre, p_apPaterno, p_apMaterno, p_dni, p_email, p_password, p_codUniversitario, p_tipoCodUniversitario, TRUE);
+        INSERT INTO usuario (nombre, apPaterno, apMaterno, dni, rol, email, password, codUniversitario, tipoCodUniversitario, activo)
+        VALUES (p_nombre, p_apPaterno, p_apMaterno, p_dni, p_rol, p_email, p_password, p_codUniversitario, p_tipoCodUniversitario, TRUE);
         
         SELECT LAST_INSERT_ID() AS idUsuario, 'Usuario insertado correctamente' AS Mensaje;
 
@@ -65,6 +67,7 @@ BEGIN
                 apPaterno = IFNULL(p_apPaterno, apPaterno),
                 apMaterno = IFNULL(p_apMaterno, apMaterno),
                 dni = IFNULL(p_dni, dni),
+                rol = IFNULL(p_rol, rol),
                 email = IFNULL(p_email, email),
                 password = IFNULL(p_password, password),
                 codUniversitario = IFNULL(p_codUniversitario, codUniversitario),
@@ -136,7 +139,8 @@ BEGIN
     END IF;
 
     COMMIT;
-
+    
+  END;
 
 -- Verificar que todo se creó correctamente
 SELECT 'Base de datos y tablas creadas correctamente' AS Status;

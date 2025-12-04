@@ -10,6 +10,7 @@ import crearUsuarioInicial from './src/database/setup.js';
 import usuariosRoutes from './src/routes/usuarios.js';
 import autenticacionRoutes from './src/routes/autenticacion.js';
 import actividadRoutes from './src/routes/actividad.js';
+import grupoVoluntarioRoutes from './src/routes/grupoVoluntario.js';
 
 // Configuración de __dirname para ES6
 // const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,7 @@ const iniciarServidor = async () => {
         app.use('/api/usuarios', usuariosRoutes);
         app.use('/api/auth', autenticacionRoutes);
         app.use('/api/actividad', actividadRoutes);
+        app.use('/api/grupoVoluntario', grupoVoluntarioRoutes);
 
         // Ruta por defecto
         app.get('/', (req, res) => {

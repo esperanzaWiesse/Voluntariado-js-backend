@@ -10,7 +10,7 @@ export const obtenerUsuarios = async (req, res) => {
         const idUsuario = id ? parseInt(id) : null;
         
         const [result] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
             [accion, idUsuario]
         );
 
@@ -45,6 +45,7 @@ export const crearUsuario = async (req, res) => {
             apPaterno, 
             apMaterno, 
             dni, 
+            rol,
             email, 
             password,
             codUniversitario,
@@ -65,13 +66,14 @@ export const crearUsuario = async (req, res) => {
 
         // Insertar usuario
         const [result] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, NULL, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'CALL sp_Usuario_CRUD(?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 'INSERT',
                 nombre,
                 apPaterno,
                 apMaterno,
                 dni,
+                rol,
                 email,
                 hashedPassword,
                 codUniversitario || null,
@@ -115,6 +117,7 @@ export const actualizarUsuario = async (req, res) => {
             apPaterno, 
             apMaterno, 
             dni, 
+            rol,
             email, 
             password,
             codUniversitario,
@@ -128,7 +131,7 @@ export const actualizarUsuario = async (req, res) => {
         }
 
         const [result] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 'UPDATE',
                 parseInt(id),
@@ -136,6 +139,7 @@ export const actualizarUsuario = async (req, res) => {
                 apPaterno || null,
                 apMaterno || null,
                 dni || null,
+                rol || null,
                 email || null,
                 hashedPassword,
                 codUniversitario || null,
@@ -167,7 +171,7 @@ export const eliminarUsuario = async (req, res) => {
         const { id } = req.params;
 
         const [result] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
             ['DELETE', parseInt(id)]
         );
 
@@ -194,7 +198,7 @@ export const buscarPorDNI = async (req, res) => {
         const { dni } = req.params;
 
         const [result] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, NULL, NULL, NULL, NULL, ?, NULL, NULL, NULL, NULL)',
+            'CALL sp_Usuario_CRUD(?, NULL, NULL, NULL, NULL, ?, NULL, NULL, NULL, NULL, NULL)',
             ['SELECT', parseInt(dni)]
         );
 
