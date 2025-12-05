@@ -6,6 +6,42 @@ export const obtenerUsuarios = async (req, res) => {
     try {
         const { id } = req.params;
         
+        const accion = 'SELECTALL';
+        const idUsuario = id ? parseInt(id) : null;
+        
+        const [result] = await pool.query(
+            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+            [accion, idUsuario]
+        );
+
+        const usuarios = result[0];
+        
+        // Remover passwords de la respuesta
+        const usuariosSinPassword = usuarios.map(usuario => {
+            const { password, ...usuarioSinPass } = usuario;
+            return usuarioSinPass;
+        });
+
+        res.status(200).json({
+            ok: true,
+            usuarios: usuariosSinPassword
+        });
+
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener usuarios',
+            error: error.message
+        });
+    }
+};
+
+// Obtener todos los usuarios activos
+export const obtenerUsuariosActivos = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
         const accion = 'SELECT';
         const idUsuario = id ? parseInt(id) : null;
         
@@ -167,26 +203,88 @@ export const actualizarUsuario = async (req, res) => {
 
 // Eliminar usuario
 export const eliminarUsuario = async (req, res) => {
-    try {
-        const { id } = req.params;
 
+    // obteniendo el valor del campo activo
+    try {
+       const { id } = req.params;
+        
+        const accion = 'SELECT';
+        const idUsuario = id ? parseInt(id) : null;
+        
         const [result] = await pool.query(
             'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
-            ['DELETE', parseInt(id)]
+            [accion, idUsuario]
         );
 
-        const respuesta = result[0][0];
-
-        res.status(200).json({
-            ok: true,
-            msg: respuesta.Mensaje
+        const usuarios = result[0];
+        
+        // Remover passwords de la respuesta
+        const usuariosSinPassword = usuarios.map(usuario => {
+            const { password, ...usuarioSinPass } = usuario;
+            return usuarioSinPass;
         });
 
+        const estadoUsuario = usuariosSinPassword[0].activo;
+
+        // condicion para activar o desactivar
+        if( estadoUsuario === 1 ){
+            // desactivar usuario
+            try {
+                const { id } = req.params;
+
+                const [result] = await pool.query(
+                    'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+                    ['DELETE', parseInt(id)]
+                );
+
+                const respuesta = result[0][0];
+
+                res.status(200).json({
+                    ok: true,
+                    msg: respuesta.Mensaje
+                });
+
+            } catch (error) {
+                console.error('Error al eliminar usuario:', error);
+                res.status(500).json({
+                    ok: false,
+                    msg: 'Error al eliminar usuario',
+                    error: error.message
+                });
+            }
+
+        } else {
+            // activar usuario
+            try {
+                const { id } = req.params;
+
+                const [result] = await pool.query(
+                    'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+                    ['RESTORE', parseInt(id)]
+                );
+
+                const respuesta = result[0][0];
+
+                res.status(200).json({
+                    ok: true,
+                    msg: respuesta.Mensaje
+                });
+
+            } catch (error) {
+                console.error('Error al eliminar usuario:', error);
+                res.status(500).json({
+                    ok: false,
+                    msg: 'Error al eliminar usuario',
+                    error: error.message
+                });
+            }
+        }
+
     } catch (error) {
-        console.error('Error al eliminar usuario:', error);
+        console.error('Error al buscar usuario por DNI:', error);
         res.status(500).json({
             ok: false,
-            msg: 'Error al eliminar usuario',
+            msg: 'Error al buscar usuario',
             error: error.message
         });
     }

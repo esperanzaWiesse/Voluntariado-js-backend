@@ -100,8 +100,8 @@ BEGIN
 
     ELSEIF p_Accion = 'SELECT' THEN
         IF p_idUsuario IS NOT NULL THEN
-            -- Seleccionar un usuario específico (solo activos)
-            SELECT * FROM usuario WHERE idUsuario = p_idUsuario AND activo = TRUE;
+            -- Seleccionar un usuario específico
+            SELECT * FROM usuario WHERE idUsuario = p_idUsuario;
         ELSEIF p_dni IS NOT NULL THEN
             -- Buscar por DNI (solo activos)
             SELECT * FROM usuario WHERE dni = p_dni AND activo = TRUE;
