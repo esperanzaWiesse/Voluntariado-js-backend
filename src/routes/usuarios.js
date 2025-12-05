@@ -23,11 +23,12 @@ const router = Router();
 // router.delete('/:id', validarJWT, eliminarUsuario);
 
 // solo para hacer pruevaas sin el frontend 
-router.get('/', obtenerUsuarios);
-router.get('/:id',  obtenerUsuarios);
-router.get('/dni/:dni', buscarPorDNI);
-router.post('/', validarCampos('usuario'), crearUsuario);
-router.put('/:id',  validarCampos('usuario'), actualizarUsuario);
-router.delete('/:id',  eliminarUsuario);
+router.get('/', validarJWT, obtenerUsuarios);
+router.get('/:id', validarJWT, obtenerUsuarios);
+// router.get('/dni/:dni', buscarPorDNI);  // no se esta usando (se esta haciendo la busqueda desde angular )
+// router.get('/busqueda/:termino', buscarPorDNI); // no se esta usando (se esta haciendo la busqueda desde angular )
+router.post('/',validarJWT,  validarCampos('usuario'), crearUsuario);
+router.put('/:id',validarJWT,   validarCampos('usuario'), actualizarUsuario);
+router.delete('/delete/:id',validarJWT, eliminarUsuario);
 
 export default router;

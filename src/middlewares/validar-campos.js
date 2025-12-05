@@ -8,6 +8,7 @@ const esquemas = {
             dni: { requerido: true, tipo: 'number', egex: /^[0-9]{8}$/  }, // verifica que siempre tenga 8 dígitos
             // dni: { requerido: true, tipo: 'string', regex: /^[1-9][0-9]{7}$/  }, // ^[1-9] → el primer dígito debe ser del 1 al 9 (no 0).  [0-9]{7} → los siguientes 7 dígitos deben ser números.
             email: { requerido: true, tipo: 'email' },
+            rol: { requerido: true, tipo: 'string' },
             password: { requerido: true, tipo: 'string', min: 6, max: 255 },
             codUniversitario: { requerido: false, tipo: 'string', max: 20 },
             tipoCodUniversitario: { requerido: false, tipo: 'string', max: 50 }
