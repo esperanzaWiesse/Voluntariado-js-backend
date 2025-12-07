@@ -15,7 +15,7 @@ export const obtenerTodasActividades = async (req, res) => {
         const idActividad = id ? parseInt(id) : null;
 
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL)',
+            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL)',
             [accion, idActividad]
         );
 
@@ -36,40 +36,70 @@ export const obtenerTodasActividades = async (req, res) => {
     }
 };
 
-// Obtener todas las actividades (id, activos)
-export const obtenerActividades = async (req, res) => {
+// Obtener actividad por ID
+export const obtenerActividadPorId = async (req, res) => {
     try {
         const { id } = req.params;
-
-        const accion = 'SELECT';
-        const idActividad = id ? parseInt(id) : null;
+        const idActividad = parseInt(id);
 
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL)',
-            [accion, idActividad]
+            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL)',
+            ['SELECT', idActividad]
         );
 
-        const actividades = result[0];
-
-        res.status(200).json({
-            ok: true,
-            actividades: actividades
-        });
+        if (result[0] && result[0].length > 0) {
+            res.status(200).json({
+                ok: true,
+                actividad: result[0][0]
+            });
+        } else {
+            res.status(404).json({
+                ok: false,
+                msg: 'Actividad no encontrada'
+            });
+        }
 
     } catch (error) {
-        console.error('Error al obtener actividades:', error);
+        console.error('Error al obtener actividad:', error);
         res.status(500).json({
             ok: false,
-            msg: 'Error al obtener actividades',
+            msg: 'Error al obtener actividad',
             error: error.message
         });
     }
 };
 
-// Crear un nueva actividad
+// Obtener actividades por grupo
+export const obtenerActividadesPorGrupo = async (req, res) => {
+    try {
+        const { idGrupo } = req.params;
+
+        const [result] = await pool.query(
+            'CALL sp_Actividad_CRUD(?, NULL, ?, NULL, NULL, NULL, NULL)',
+            ['SELECT', parseInt(idGrupo)]
+        );
+
+        res.status(200).json({
+            ok: true,
+            actividades: result[0]
+        });
+
+    } catch (error) {
+        console.error('Error al obtener actividades del grupo:', error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener actividades del grupo',
+            error: error.message
+        });
+    }
+};
+
+
+// Crear una nueva actividad
 export const crearActividad = async (req, res) => {
     try {
         const {
+            idGrupoVoluntariado,
             nombre,
             descripcion,
             fecha,
@@ -77,18 +107,18 @@ export const crearActividad = async (req, res) => {
         } = req.body;
 
         // Validaciones básicas
-        if (!nombre || !descripcion || !fecha || !duracionhoras) {
+        if (!idGrupoVoluntariado || !nombre || !descripcion || !fecha || !duracionhoras) {
             return res.status(400).json({
                 ok: false,
-                msg: 'Todos los campos obligatorios deben ser completados'
+                msg: 'Todos los campos obligatorios deben ser completados (incluido idGrupoVoluntariado)'
             });
         }
 
-        // Insertar usuario
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, NULL, ?, ?, ?, ?)',
+            'CALL sp_Actividad_CRUD(?, NULL, ?, ?, ?, ?, ?)',
             [
                 'INSERT',
+                parseInt(idGrupoVoluntariado),
                 nombre,
                 descripcion,
                 formatDateForMySQL(fecha),
@@ -101,20 +131,17 @@ export const crearActividad = async (req, res) => {
         res.status(201).json({
             ok: true,
             msg: respuesta.Mensaje,
-            idActividad: respuesta.idActividad
+            idActividad: respuesta.idActi
         });
 
     } catch (error) {
         console.error('Error al crear actividad:', error);
-
-        // Manejo de errores específicos
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({
                 ok: false,
                 msg: 'La actividad ya está registrada'
             });
         }
-
         res.status(500).json({
             ok: false,
             msg: 'Error al crear Actividad',
@@ -128,6 +155,7 @@ export const actualizarActividad = async (req, res) => {
     try {
         const { id } = req.params;
         const {
+            idGrupoVoluntariado,
             nombre,
             descripcion,
             fecha,
@@ -135,24 +163,31 @@ export const actualizarActividad = async (req, res) => {
         } = req.body;
 
         const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, ?, ?, ?, ?, ?)',
+            'CALL sp_Actividad_CRUD(?, ?, ?, ?, ?, ?, ?)',
             [
                 'UPDATE',
                 parseInt(id),
+                idGrupoVoluntariado ? parseInt(idGrupoVoluntariado) : null,
                 nombre || null,
                 descripcion || null,
-                formatDateForMySQL(fecha),
+                fecha ? formatDateForMySQL(fecha) : null,
                 duracionhoras || null
             ]
         );
 
-        const respuesta = result[0][0];
-
-        res.status(200).json({
-            ok: true,
-            msg: respuesta.Mensaje,
-            idActividad: respuesta.idActividad
-        });
+        if (result[0] && result[0].length > 0) {
+            const respuesta = result[0][0];
+            res.status(200).json({
+                ok: true,
+                msg: respuesta.Mensaje,
+                idActividad: respuesta.idActi
+            });
+        } else {
+            res.status(404).json({
+                ok: false,
+                msg: 'Actividad no encontrada'
+            });
+        }
 
     } catch (error) {
         console.error('Error al actualizar actividad:', error);
@@ -166,83 +201,45 @@ export const actualizarActividad = async (req, res) => {
 
 // Eliminar actividad
 export const eliminarActividad = async (req, res) => {
-
-    // obteniendo el valor del campo activo
     try {
         const { id } = req.params;
 
-        const accion = 'SELECT';
-        const idActi = id ? parseInt(id) : null;
-
-        const [result] = await pool.query(
-            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL)',
-            [accion, idActi]
+        // Primero verificamos el estado
+        const [check] = await pool.query(
+            'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL)',
+            ['SELECT', parseInt(id)]
         );
 
+        if (!check[0] || check[0].length === 0) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Actividad no encontrada'
+            });
+        }
 
-        const actividades = result[0];
+        const actividad = check[0][0];
 
-        const estadoActividad = actividades[0].activo;
-
-        // condicion para activar o desactivar
-        if (estadoActividad === 1) {
-            // desactivar actividad
-            try {
-                const { id } = req.params;
-
-                const [result] = await pool.query(
-                    'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL)',
-                    ['DELETE', parseInt(id)]
-                );
-
-                const respuesta = result[0][0];
-
-                res.status(200).json({
-                    ok: true,
-                    msg: respuesta.Mensaje
-                });
-
-            } catch (error) {
-                console.error('Error al eliminar actividad:', error);
-                res.status(500).json({
-                    ok: false,
-                    msg: 'Error al eliminar actividad',
-                    error: error.message
-                });
-            }
-
+        if (actividad.activo === 1) {
+            // Desactivar
+            const [result] = await pool.query(
+                'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL)',
+                ['DELETE', parseInt(id)]
+            );
+            res.status(200).json({ ok: true, msg: result[0][0].Mensaje });
         } else {
-            // activar actividad
-            try {
-                const { id } = req.params;
-
-                const [result] = await pool.query(
-                    'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL)',
-                    ['RESTORE', parseInt(id)]
-                );
-
-                const respuesta = result[0][0];
-
-                res.status(200).json({
-                    ok: true,
-                    msg: respuesta.Mensaje
-                });
-
-            } catch (error) {
-                console.error('Error al eliminar actividad:', error);
-                res.status(500).json({
-                    ok: false,
-                    msg: 'Error al eliminar actividad',
-                    error: error.message
-                });
-            }
+            // Restaurar
+            const [result] = await pool.query(
+                'CALL sp_Actividad_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL)',
+                ['RESTORE', parseInt(id)]
+            );
+            res.status(200).json({ ok: true, msg: result[0][0].Mensaje });
         }
 
     } catch (error) {
-        console.error('Error al buscar actividad por id:', error);
+        console.error('Error al eliminar/restaurar actividad:', error);
         res.status(500).json({
             ok: false,
-            msg: 'Error al buscar actividad',
+            msg: 'Error al procesar la solicitud',
             error: error.message
         });
     }

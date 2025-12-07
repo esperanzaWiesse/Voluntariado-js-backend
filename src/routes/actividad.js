@@ -1,12 +1,14 @@
 import { Router } from 'express';
-import { 
+import {
     obtenerTodasActividades,
-    obtenerActividades, 
+    obtenerActividadPorId,
+    obtenerActividadesPorGrupo,
     crearActividad,
     actualizarActividad,
     eliminarActividad
 } from '../controllers/actividad.js';
 import { validarCampos } from '../middlewares/validar-campos.js';
+import { validarJWT } from '../middlewares/validar-jwt.js';
 
 const router = Router();
 
@@ -14,12 +16,14 @@ const router = Router();
 // (ninguna - todas requieren autenticación)
 
 // Rutas protegidas - requieren autenticación
-router.get('/', obtenerTodasActividades); // obtine los activos y los inactivos
-router.get('/:id',  obtenerActividades); // obtine los activos y los inactivos
-router.post('/', validarCampos('actividad'), crearActividad);
-router.put('/:id',  validarCampos('actividad'), actualizarActividad);
-router.delete('/delete/:id',  eliminarActividad);
 
-router.get('/activos', obtenerActividades); // obtine solo los activos
+router.get('/', validarJWT, obtenerTodasActividades);
+router.get('/:id', validarJWT, obtenerActividadPorId);
+router.get('/grupo/:idGrupo', validarJWT, obtenerActividadesPorGrupo);
+router.post('/', validarJWT, validarCampos('actividad'), crearActividad);
+router.put('/:id', validarJWT, validarCampos('actividad'), actualizarActividad);
+router.delete('/:id', validarJWT, eliminarActividad);
+
+
 
 export default router;
