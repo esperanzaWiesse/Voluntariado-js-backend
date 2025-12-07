@@ -19,12 +19,49 @@ npm install
 > Puedes usar visual estudio code para abrir el proyecto, despues presiona `control + j` para abrir el terminal. Luego ejecuta el comando de arriba. 
 
 ## pasos para probar el funcionamiento del backend 
-1.  correr los scrips de la carpeta schema antes de hacer el depy de la api 
+1.  correr los scrips de la carpeta schema antes de hacer el deploy de la api 
+> **📝 Nota:**  Ten en cuenta que hay un archivo que crea el primer usuario del sistema, dicho archivo se llama en el `index.js`, demodo que se crea automaticamente el primer usuario. 
+```txt
+ORDEN CORRECTO:
+1. usuario          (independiente)
+2. Cargo            (independiente)
+3. GrupoVoluntariado (independiente)
+4. Actividad        (depende de: GrupoVoluntariado)
+5. GrupoVoluntariado_Usuario (depende de: GrupoVoluntariado, usuario, Cargo)
+6. Actividad_Usuario (depende de: Actividad, usuario)
+7. Certificado      (depende de: GrupoVoluntariado, usuario)
+
+REGLA GENERAL:
+- Primero crear las tablas que no tienen claves foráneas
+- Luego crear las tablas que dependen de las anteriores
+- Las tablas intermedias (muchos a muchos) se crean al final
+```
+
 2.  para correr de forma local la api, abrir un terminal en la raiz del proyecto y ejecutar el comando `npm start`   
 3.  
 4.  
 5.  
 
+## Formato del número de certificado auto-generado:
+```txt
+CERT-2024-0001-000002-1234
+     │    │     │      └─ Número aleatorio
+     │    │     └─ ID Usuario (6 dígitos)
+     │    └─ ID Grupo (4 dígitos)
+     └─ Año actual
+```
+
+## El código YA está protegido contra SQL Injection 🛡️
+¿Por qué? Porque usas procedimientos almacenados con parámetros preparados:
+``` bash
+✅ ESTO ESTÁ SEGURO
+await pool.query(
+    'CALL sp_Cargo_CRUD(?, ?, ?, ?, ?)',
+    ['INSERT', nombreCargo, descripcion, fecha]
+);
+
+Los ? son placeholders que MySQL escapa automáticamente, previniendo SQL Injection.
+```
 ## estructura de archivos
 ```txt
 backend/

@@ -32,7 +32,7 @@ const crearUsuarioInicial = async () => {
 
         // Insertar usuario usando el procedimiento almacenado
         const [result] = await pool.query(
-            `CALL sp_Usuario_CRUD(?, NULL, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `CALL sp_Usuario_CRUD(?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 'INSERT',
                 usuarioInicial.nombre,
@@ -42,7 +42,8 @@ const crearUsuarioInicial = async () => {
                 usuarioInicial.email,
                 hashedPassword,
                 usuarioInicial.codUniversitario,
-                usuarioInicial.tipoCodUniversitario
+                usuarioInicial.tipoCodUniversitario,
+                'Administrador' // Rol
             ]
         );
 

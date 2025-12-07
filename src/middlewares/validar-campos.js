@@ -27,30 +27,44 @@ const esquemas = {
             descripcion: { requerido: true, tipo: 'string', min: 10, max: 5000 },
             fecha: { requerido: true, tipo: 'date' },
             duracionhoras: { requerido: true, tipo: 'number', min: 1 },
-            // ubicacion: { requerido: true, tipo: 'string', max: 255 },
-            // cupoMaximo: { requerido: true, tipo: 'number', min: 1 },
-            // estado: { requerido: false, tipo: 'enum', valores: ['activa', 'cancelada', 'finalizada'] }
+            idGrupoVoluntariado: { tipo: 'number', min: 1 },
         }
     },
     grupoVoluntario: {
         campos: {
             nombreGrupoVoluntariado: { requerido: true, tipo: 'string', min: 3, max: 150 },
-            fechaCreacionGrupoVoluntariado: { requerido: false, tipo: 'date' }
+            fechaCreacionGrupoVoluntariado: { requerido: false, tipo: 'date' },
+            duracionHoras: { requerido: true, tipo: 'number', min: 1 },
+            duracionDias: { requerido: true, tipo: 'number', min: 1 },
+            maxMiembros: { requerido: true, tipo: 'number', min: 1 },
+            descripcion: { requerido: true, tipo: 'string', min: 10, max: 5000 },
+
         }
     },
-    rol: {
+    Certificado: {
         campos: {
-            nombre: { requerido: true, tipo: 'string', min: 3, max: 50 },
-            descripcion: { requerido: false, tipo: 'string', max: 255 },
-            permisos: { requerido: false, tipo: 'string' }
+            numeroCertificado: { requerido: false, tipo: 'number', min: 2, max: 100 },
+            idGrupoVoluntariado: { requerido: false, tipo: 'number', min: 1 },
+            idUsuario: { requerido: false, tipo: 'number', min: 1 },
+            horasCompletadas: { requerido: true, tipo: 'number', min: 1 },
+            fechaEmision: { requerido: true, tipo: 'date' },
         }
     },
-    inscripcion: {
+    ActividadUsuario: {
         campos: {
-            idUsuario: { requerido: true, tipo: 'number', min: 1 },
-            idActividad: { requerido: true, tipo: 'number', min: 1 },
-            estado: { requerido: false, tipo: 'enum', valores: ['pendiente', 'confirmada', 'cancelada'] },
-            comentarios: { requerido: false, tipo: 'string', max: 500 }
+            idUsuario: { requerido: false, tipo: 'number', min: 2, max: 100 },
+            fechaCompletado: { requerido: true, tipo: 'date' },
+            horasRealizadas: { requerido: true, tipo: 'number', min: 1 },
+            completado: { requerido: true, tipo: 'boolean' },
+        }
+
+    },
+    GrupoVoluntariadoUsuario: {
+        campos: {
+            idGrupoVoluntariado: { requerido: false, tipo: 'number', min: 2, max: 100 },
+            idUsuario: { requerido: false, tipo: 'number', min: 2, max: 100 },
+            idCargo: { requerido: false, tipo: 'number', min: 2, max: 100 },
+            fechaInscripcion: { requerido: true, tipo: 'date' }
         }
     }
 };

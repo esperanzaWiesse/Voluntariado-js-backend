@@ -16,7 +16,7 @@ export const login = async (req, res) => {
 
         // Buscar usuario por email
         const [result] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, NULL, NULL,  NULL, NULL, NULL, NULL, ?, NULL, NULL, NULL)',
+            'CALL sp_Usuario_CRUD(?, NULL, NULL, NULL, NULL, NULL, ?, NULL, NULL, NULL, NULL)',
             ['SELECT', email]
         );
 
@@ -69,7 +69,7 @@ export const renovarToken = async (req, res) => {
 
         // Buscar usuario por ID
         const [result] = await pool.query(
-            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+            'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
             ['SELECT', idUsuario]
         );
 

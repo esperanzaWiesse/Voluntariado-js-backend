@@ -5,17 +5,17 @@ import pool from '../config/database.js';
 export const obtenerTodosUsuarios = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const accion = 'SELECTALL';
         const idUsuario = id ? parseInt(id) : null;
-        
+
         const [result] = await pool.query(
             'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
             [accion, idUsuario]
         );
 
         const usuarios = result[0];
-        
+
         // Remover passwords de la respuesta
         const usuariosSinPassword = usuarios.map(usuario => {
             const { password, ...usuarioSinPass } = usuario;
@@ -41,17 +41,17 @@ export const obtenerTodosUsuarios = async (req, res) => {
 export const obtenerUsuarios = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const accion = 'SELECT';
         const idUsuario = id ? parseInt(id) : null;
-        
+
         const [result] = await pool.query(
             'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
             [accion, idUsuario]
         );
 
         const usuarios = result[0];
-        
+
         // Remover passwords de la respuesta
         const usuariosSinPassword = usuarios.map(usuario => {
             const { password, ...usuarioSinPass } = usuario;
@@ -76,13 +76,13 @@ export const obtenerUsuarios = async (req, res) => {
 // Crear un nuevo usuario
 export const crearUsuario = async (req, res) => {
     try {
-        const { 
-            nombre, 
-            apPaterno, 
-            apMaterno, 
-            dni, 
+        const {
+            nombre,
+            apPaterno,
+            apMaterno,
+            dni,
             rol,
-            email, 
+            email,
             password,
             codUniversitario,
             tipoCodUniversitario
@@ -109,11 +109,11 @@ export const crearUsuario = async (req, res) => {
                 apPaterno,
                 apMaterno,
                 dni,
-                rol,
                 email,
                 hashedPassword,
                 codUniversitario || null,
-                tipoCodUniversitario || null
+                tipoCodUniversitario || null,
+                rol
             ]
         );
 
@@ -127,7 +127,7 @@ export const crearUsuario = async (req, res) => {
 
     } catch (error) {
         console.error('Error al crear usuario:', error);
-        
+
         // Manejo de errores específicos
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(400).json({
@@ -148,13 +148,13 @@ export const crearUsuario = async (req, res) => {
 export const actualizarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
-        const { 
-            nombre, 
-            apPaterno, 
-            apMaterno, 
-            dni, 
+        const {
+            nombre,
+            apPaterno,
+            apMaterno,
+            dni,
             rol,
-            email, 
+            email,
             password,
             codUniversitario,
             tipoCodUniversitario
@@ -175,11 +175,11 @@ export const actualizarUsuario = async (req, res) => {
                 apPaterno || null,
                 apMaterno || null,
                 dni || null,
-                rol || null,
                 email || null,
                 hashedPassword,
                 codUniversitario || null,
-                tipoCodUniversitario || null
+                tipoCodUniversitario || null,
+                rol || null
             ]
         );
 
@@ -206,18 +206,18 @@ export const eliminarUsuario = async (req, res) => {
 
     // obteniendo el valor del campo activo
     try {
-       const { id } = req.params;
-        
+        const { id } = req.params;
+
         const accion = 'SELECT';
         const idUsuario = id ? parseInt(id) : null;
-        
+
         const [result] = await pool.query(
             'CALL sp_Usuario_CRUD(?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
             [accion, idUsuario]
         );
 
         const usuarios = result[0];
-        
+
         // Remover passwords de la respuesta
         const usuariosSinPassword = usuarios.map(usuario => {
             const { password, ...usuarioSinPass } = usuario;
@@ -227,7 +227,7 @@ export const eliminarUsuario = async (req, res) => {
         const estadoUsuario = usuariosSinPassword[0].activo;
 
         // condicion para activar o desactivar
-        if( estadoUsuario === 1 ){
+        if (estadoUsuario === 1) {
             // desactivar usuario
             try {
                 const { id } = req.params;

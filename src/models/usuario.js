@@ -2,26 +2,26 @@ import db from '../config/database.js';
 import bcrypt from 'bcrypt';
 
 class Usuario {
-  
+
   // Crear un nuevo usuario usando SP (con hash automático)
   static async crear(usuarioData) {
-    const { 
-      nombre, 
-      apPaterno, 
-      apMaterno, 
-      dni, 
-      email, 
-      password, 
-      codUniversitario = null, 
-      tipoCodUniversitario = null 
+    const {
+      nombre,
+      apPaterno,
+      apMaterno,
+      dni,
+      email,
+      password,
+      codUniversitario = null,
+      tipoCodUniversitario = null
     } = usuarioData;
-    
+
     try {
       // Hashear el password antes de insertar
       const passwordHash = await bcrypt.hash(password, 10);
-      
+
       const [result] = await db.query(
-        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           'INSERT',
           null,
@@ -32,16 +32,17 @@ class Usuario {
           email,
           passwordHash, // Password hasheado
           codUniversitario,
-          tipoCodUniversitario
+          tipoCodUniversitario,
+          null // rol
         ]
       );
-      
+
       const insertResult = result[0][0];
-      
+
       if (insertResult.ErrorNumber) {
         throw new Error(insertResult.ErrorMessage);
       }
-      
+
       return {
         idUsuario: insertResult.idUsuario,
         mensaje: insertResult.Mensaje,
@@ -70,13 +71,13 @@ class Usuario {
   static async buscarPorId(id) {
     try {
       const [result] = await db.query(
-        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        ['SELECT', id, null, null, null, null, null, null, null, null]
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', id, null, null, null, null, null, null, null, null, null]
       );
-      
+
       const usuarios = result[0];
       if (usuarios.length === 0) return null;
-      
+
       return Usuario.formatearRespuesta(usuarios[0]);
     } catch (error) {
       throw error;
@@ -87,13 +88,13 @@ class Usuario {
   static async buscarPorEmail(email) {
     try {
       const [result] = await db.query(
-        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        ['SELECT', null, null, null, null, null, email, null, null, null]
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', null, null, null, null, null, email, null, null, null, null]
       );
-      
+
       const usuarios = result[0];
       if (usuarios.length === 0) return null;
-      
+
       return usuarios[0]; // Retorna con password para autenticación
     } catch (error) {
       throw error;
@@ -104,13 +105,13 @@ class Usuario {
   static async buscarPorDni(dni) {
     try {
       const [result] = await db.query(
-        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        ['SELECT', null, null, null, null, dni, null, null, null, null]
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', null, null, null, null, dni, null, null, null, null, null]
       );
-      
+
       const usuarios = result[0];
       if (usuarios.length === 0) return null;
-      
+
       return Usuario.formatearRespuesta(usuarios[0]);
     } catch (error) {
       throw error;
@@ -121,13 +122,13 @@ class Usuario {
   static async obtenerTodos(limite = 10, desde = 0) {
     try {
       const [result] = await db.query(
-        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        ['SELECT', null, null, null, null, null, null, null, null, null]
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['SELECT', null, null, null, null, null, null, null, null, null, null]
       );
-      
+
       const usuarios = result[0];
       const usuariosPaginados = usuarios.slice(desde, desde + limite);
-      
+
       return usuariosPaginados.map(row => Usuario.formatearRespuesta(row));
     } catch (error) {
       throw error;
@@ -136,23 +137,23 @@ class Usuario {
 
   // Actualizar usuario usando SP (hashea password si se proporciona)
   static async actualizar(id, usuarioData) {
-    const { 
-      nombre, 
-      apPaterno, 
-      apMaterno, 
-      dni, 
-      email, 
-      password, 
-      codUniversitario, 
-      tipoCodUniversitario 
+    const {
+      nombre,
+      apPaterno,
+      apMaterno,
+      dni,
+      email,
+      password,
+      codUniversitario,
+      tipoCodUniversitario
     } = usuarioData;
-    
+
     try {
       // Si se proporciona un nuevo password, hashearlo
       let passwordHash = password ? await bcrypt.hash(password, 10) : null;
-      
+
       const [result] = await db.query(
-        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           'UPDATE',
           id,
@@ -163,16 +164,17 @@ class Usuario {
           email || null,
           passwordHash,
           codUniversitario || null,
-          tipoCodUniversitario || null
+          tipoCodUniversitario || null,
+          null // rol
         ]
       );
-      
+
       const updateResult = result[0][0];
-      
+
       if (updateResult.ErrorNumber) {
         throw new Error(updateResult.ErrorMessage);
       }
-      
+
       return await Usuario.buscarPorId(id);
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
@@ -191,16 +193,16 @@ class Usuario {
   static async eliminar(id) {
     try {
       const [result] = await db.query(
-        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        ['DELETE', id, null, null, null, null, null, null, null, null]
+        'CALL sp_Usuario_CRUD(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ['DELETE', id, null, null, null, null, null, null, null, null, null]
       );
-      
+
       const deleteResult = result[0][0];
-      
+
       if (deleteResult.ErrorNumber) {
         throw new Error(deleteResult.ErrorMessage);
       }
-      
+
       return true;
     } catch (error) {
       throw error;
@@ -216,17 +218,17 @@ class Usuario {
   static async autenticar(email, password) {
     try {
       const usuario = await Usuario.buscarPorEmail(email);
-      
+
       if (!usuario) {
         throw new Error('Usuario no encontrado');
       }
-      
+
       const passwordValido = await bcrypt.compare(password, usuario.password);
-      
+
       if (!passwordValido) {
         throw new Error('Contraseña incorrecta');
       }
-      
+
       // Retornar usuario sin password
       return Usuario.formatearRespuesta(usuario);
     } catch (error) {
@@ -236,13 +238,13 @@ class Usuario {
 
   // Formatear respuesta (elimina password)
   static formatearRespuesta(usuario) {
-    const { 
-      password, 
-      fecha_creacion, 
-      fecha_actualizacion, 
-      ...usuarioSinPassword 
+    const {
+      password,
+      fecha_creacion,
+      fecha_actualizacion,
+      ...usuarioSinPassword
     } = usuario;
-    
+
     return {
       uid: usuario.idUsuario,
       ...usuarioSinPassword

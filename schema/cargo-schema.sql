@@ -6,6 +6,10 @@ CREATE TABLE Cargo (
     activo BOOLEAN DEFAULT TRUE COMMENT 'TRUE = activo, FALSE = eliminado lógicamente'
 );
 
+-- ============================================================================
+-- PROCEDIMIENTO: sp_Cargo_CRUD
+-- ============================================================================
+
 CREATE PROCEDURE sp_Cargo_CRUD(
     IN p_Accion VARCHAR(10),
     IN p_idCargo INT,
