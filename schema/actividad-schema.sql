@@ -73,7 +73,7 @@ BEGIN
     ELSEIF p_Accion = 'SELECT' THEN
         IF p_idActi IS NOT NULL THEN
             -- Seleccionar una actividad específica (solo activas)
-            SELECT * FROM Actividad WHERE idActi = p_idActi AND activo = TRUE;
+            SELECT * FROM Actividad WHERE idActi = p_idActi;
         ELSEIF p_nombre IS NOT NULL THEN
             -- Buscar por nombre (solo activas)
             SELECT * FROM Actividad WHERE nombre LIKE CONCAT('%', p_nombre, '%') AND activo = TRUE;

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { 
+    obtenerTodosUsuarios,
     obtenerUsuarios, 
     crearUsuario, 
     actualizarUsuario, 
@@ -15,16 +16,8 @@ const router = Router();
 // (ninguna - todas requieren autenticación)
 
 // Rutas protegidas - requieren autenticación
-// router.get('/', validarJWT, obtenerUsuarios);
-// router.get('/:id', validarJWT, obtenerUsuarios);
-// router.get('/dni/:dni', validarJWT, buscarPorDNI);
-// router.post('/', validarJWT, validarCampos, crearUsuario);
-// router.put('/:id', validarJWT, validarCampos, actualizarUsuario);
-// router.delete('/:id', validarJWT, eliminarUsuario);
-
-// solo para hacer pruevaas sin el frontend 
-router.get('/', validarJWT, obtenerUsuarios);
-router.get('/:id', validarJWT, obtenerUsuarios);
+router.get('/', validarJWT, obtenerTodosUsuarios); // obtine los activos y los inactivos
+router.get('/:id', validarJWT, obtenerUsuarios); // obtine los activos y los inactivos
 // router.get('/dni/:dni', buscarPorDNI);  // no se esta usando (se esta haciendo la busqueda desde angular )
 // router.get('/busqueda/:termino', buscarPorDNI); // no se esta usando (se esta haciendo la busqueda desde angular )
 router.post('/',validarJWT,  validarCampos('usuario'), crearUsuario);

@@ -5,7 +5,7 @@ const esquemas = {
             nombre: { requerido: true, tipo: 'string', min: 2, max: 100 },
             apPaterno: { requerido: true, tipo: 'string', min: 2, max: 100 },
             apMaterno: { requerido: true, tipo: 'string', min: 2, max: 100 },
-            dni: { requerido: true, tipo: 'number', egex: /^[0-9]{8}$/  }, // verifica que siempre tenga 8 dígitos
+            dni: { requerido: true, tipo: 'number', egex: /^[0-9]{8}$/ }, // verifica que siempre tenga 8 dígitos
             // dni: { requerido: true, tipo: 'string', regex: /^[1-9][0-9]{7}$/  }, // ^[1-9] → el primer dígito debe ser del 1 al 9 (no 0).  [0-9]{7} → los siguientes 7 dígitos deben ser números.
             email: { requerido: true, tipo: 'email' },
             rol: { requerido: true, tipo: 'string' },
@@ -14,10 +14,17 @@ const esquemas = {
             tipoCodUniversitario: { requerido: false, tipo: 'string', max: 50 }
         }
     },
+    cargo: {
+        campos: {
+            nombreCargo: { requerido: true, tipo: 'string', min: 2, max: 100 },
+            descripcion: { requerido: true, tipo: 'string', min: 2, max: 5000 },
+            fechaCreacion: { requerido: true, tipo: 'date' }
+        }
+    },
     actividad: {
         campos: {
             nombre: { requerido: true, tipo: 'string', min: 3, max: 200 },
-            descripcion: { requerido: true, tipo: 'string', min: 10, max: 1000 },
+            descripcion: { requerido: true, tipo: 'string', min: 10, max: 5000 },
             fecha: { requerido: true, tipo: 'date' },
             duracionhoras: { requerido: true, tipo: 'number', min: 1 },
             // ubicacion: { requerido: true, tipo: 'string', max: 255 },
@@ -25,7 +32,7 @@ const esquemas = {
             // estado: { requerido: false, tipo: 'enum', valores: ['activa', 'cancelada', 'finalizada'] }
         }
     },
-    grupoVoluntario:{
+    grupoVoluntario: {
         campos: {
             nombreGrupoVoluntariado: { requerido: true, tipo: 'string', min: 3, max: 150 },
             fechaCreacionGrupoVoluntariado: { requerido: false, tipo: 'date' }

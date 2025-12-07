@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import pool from '../config/database.js';
 
 // Obtener todos los usuarios o uno específico
-export const obtenerUsuarios = async (req, res) => {
+export const obtenerTodosUsuarios = async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -37,8 +37,8 @@ export const obtenerUsuarios = async (req, res) => {
     }
 };
 
-// Obtener todos los usuarios activos
-export const obtenerUsuariosActivos = async (req, res) => {
+// Obtener todos los usuarios (id, activos)
+export const obtenerUsuarios = async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -281,7 +281,7 @@ export const eliminarUsuario = async (req, res) => {
         }
 
     } catch (error) {
-        console.error('Error al buscar usuario por DNI:', error);
+        console.error('Error al buscar usuario por id:', error);
         res.status(500).json({
             ok: false,
             msg: 'Error al buscar usuario',

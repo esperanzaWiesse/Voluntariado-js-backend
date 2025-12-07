@@ -8,6 +8,7 @@ import crearUsuarioInicial from './src/database/setup.js';
 
 // Rutas
 import usuariosRoutes from './src/routes/usuarios.js';
+import cargosRoutes from './src/routes/cargo.js';
 import autenticacionRoutes from './src/routes/autenticacion.js';
 import actividadRoutes from './src/routes/actividad.js';
 import grupoVoluntarioRoutes from './src/routes/grupoVoluntario.js';
@@ -43,8 +44,9 @@ const iniciarServidor = async () => {
         // Rutas de la API
         app.use('/api/usuarios', usuariosRoutes);
         app.use('/api/auth', autenticacionRoutes);
-        app.use('/api/actividad', actividadRoutes);
-        app.use('/api/grupoVoluntario', grupoVoluntarioRoutes);
+        app.use('/api/cargos', cargosRoutes);
+        app.use('/api/actividades', actividadRoutes);
+        app.use('/api/grupoVoluntarios', grupoVoluntarioRoutes);
 
         // Ruta por defecto
         app.get('/', (req, res) => {
