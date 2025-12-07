@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { 
+    obtenerTodasActividades,
     obtenerActividades, 
     crearActividad,
     actualizarActividad,
@@ -13,10 +14,12 @@ const router = Router();
 // (ninguna - todas requieren autenticación)
 
 // Rutas protegidas - requieren autenticación
-router.get('/', obtenerActividades);
-router.get('/:id',  obtenerActividades);
+router.get('/', obtenerTodasActividades); // obtine los activos y los inactivos
+router.get('/:id',  obtenerActividades); // obtine los activos y los inactivos
 router.post('/', validarCampos('actividad'), crearActividad);
 router.put('/:id',  validarCampos('actividad'), actualizarActividad);
-router.delete('/:id',  eliminarActividad);
+router.delete('/delete/:id',  eliminarActividad);
+
+router.get('/activos', obtenerActividades); // obtine solo los activos
 
 export default router;
