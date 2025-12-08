@@ -42,14 +42,14 @@ REGLA GENERAL:
 4.  
 5.  
 
-## Formato del número de certificado auto-generado:
+<!-- ## Formato del número de certificado auto-generado:
 ```txt
 CERT-2024-0001-000002-1234
      │    │     │      └─ Número aleatorio
      │    │     └─ ID Usuario (6 dígitos)
      │    └─ ID Grupo (4 dígitos)
      └─ Año actual
-```
+``` -->
 
 ## El código YA está protegido contra SQL Injection 🛡️
 ¿Por qué? Porque usas procedimientos almacenados con parámetros preparados:
