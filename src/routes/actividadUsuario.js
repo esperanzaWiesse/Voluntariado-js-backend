@@ -4,7 +4,8 @@ import {
     actualizarParticipacion,
     eliminarParticipacion,
     obtenerParticipantesActividad,
-    obtenerActividadesUsuario
+    obtenerActividadesUsuario,
+    obtenerReporteParticipacion
 } from '../controllers/actividadUsuario.js';
 import { validarJWT } from '../middlewares/validar-jwt.js';
 
@@ -16,9 +17,10 @@ router.use(validarJWT);
 // Rutas de participación
 router.post('/registrar', registrarParticipacion); // Body: idActividad, idUsuario, horasRealizadas, completado
 router.put('/:idActividad/:idUsuario', actualizarParticipacion);
-router.delete('/:idActividad/:idUsuario', eliminarParticipacion);
+router.delete('/eliminar/:idActividad/:idUsuario', eliminarParticipacion);
 
 // Consultas
+router.get('/reporte/:idUsuario', obtenerReporteParticipacion);
 router.get('/participantes/:idActividad', obtenerParticipantesActividad);
 router.get('/usuario/:idUsuario', obtenerActividadesUsuario);
 

@@ -22,8 +22,7 @@ router.get('/:id', validarJWT, obtenerActividadPorId);
 router.get('/grupo/:idGrupo', validarJWT, obtenerActividadesPorGrupo);
 router.post('/', validarJWT, validarCampos('actividad'), crearActividad);
 router.put('/:id', validarJWT, validarCampos('actividad'), actualizarActividad);
-router.delete('/:id', validarJWT, eliminarActividad);
-
+router.delete('/grupo/:idGrupo/actividad/:id', validarJWT, eliminarActividad);
 
 
 export default router;

@@ -14,6 +14,7 @@ import actividadRoutes from './src/routes/actividad.js';
 
 import actividadUsuarioRoutes from './src/routes/actividadUsuario.js';
 import grupoVoluntarioRoutes from './src/routes/grupoVoluntario.js';
+import grupoVoluntarioUsuarioRoutes from './src/routes/grupoVoluntarioUsuario.js';
 
 // Configuración de __dirname para ES6
 // const __filename = fileURLToPath(import.meta.url);
@@ -50,6 +51,7 @@ const iniciarServidor = async () => {
         app.use('/api/actividades', actividadRoutes);
         app.use('/api/participacion', actividadUsuarioRoutes);
         app.use('/api/grupoVoluntarios', grupoVoluntarioRoutes);
+        app.use('/api/inscripciones', grupoVoluntarioUsuarioRoutes);
 
         // Ruta por defecto
         app.get('/', (req, res) => {

@@ -16,7 +16,7 @@ export const obtenerTodosGrupoVoluntario = async (req, res) => {
         if (result[0] && result[0].length > 0) {
             res.status(200).json({
                 ok: true,
-                grupoVoluntario: result[0][0]
+                grupoVoluntarios: result[0]
             });
         } else {
             res.status(404).json({
